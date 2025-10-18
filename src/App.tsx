@@ -2,6 +2,7 @@ import { GameProvider, useGame } from "./context/GameContext";
 import { StartScreen } from "./screens/StartScreen";
 import { GameScreen } from "./screens/GameScreen";
 import { ResultScreen } from "./screens/ResultScreen";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function AppContent() {
   const { state } = useGame();
@@ -19,7 +20,11 @@ function AppContent() {
     }
   };
 
-  return <div className="app">{renderScreen()}</div>;
+  return (
+    <ErrorBoundary>
+      <div className="app">{renderScreen()}</div>
+    </ErrorBoundary>
+  );
 }
 
 function App() {

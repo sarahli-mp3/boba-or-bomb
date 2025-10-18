@@ -28,22 +28,25 @@ export interface Cup {
   height: number;
 }
 
-export interface GameAssets {
-  drinks: {
-    taro: HTMLImageElement;
-    milk_tea: HTMLImageElement;
-    matcha: HTMLImageElement;
-  };
-  items: {
-    boba: HTMLImageElement;
-    bomb: HTMLImageElement;
-  };
-  overlays: HTMLImageElement[];
-}
-
 export interface InputState {
   left: boolean;
   right: boolean;
   mouseX: number;
   isDragging: boolean;
+}
+
+// Game Settings Types
+export interface GameSettings {
+  highScore: number;
+  soundEnabled: boolean;
+  difficulty: "easy" | "normal" | "hard";
+  showFPS: boolean;
+  particleEffects: boolean;
+}
+
+export interface GameStats {
+  gamesPlayed: number;
+  totalBobaCollected: number;
+  bestStreak: number;
+  averageGameTime: number;
 }

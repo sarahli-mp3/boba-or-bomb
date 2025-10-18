@@ -1,4 +1,11 @@
-import { createContext, useContext, useReducer, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
 import { GameState, DrinkType, GameResult } from "../types";
 
 interface GameContextType {
@@ -70,34 +77,37 @@ interface GameProviderProps {
 export function GameProvider({ children }: GameProviderProps) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
-  const selectDrink = (drink: DrinkType) => {
+  const selectDrink = useCallback((drink: DrinkType) => {
     dispatch({ type: "SELECT_DRINK", payload: drink });
-  };
+  }, []);
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     dispatch({ type: "START_GAME" });
-  };
+  }, []);
 
-  const endGame = (result: GameResult) => {
+  const endGame = useCallback((result: GameResult) => {
     dispatch({ type: "END_GAME", payload: result });
-  };
+  }, []);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     dispatch({ type: "RESET_GAME" });
-  };
+  }, []);
 
-  const setBobaCount = (count: number) => {
+  const setBobaCount = useCallback((count: number) => {
     dispatch({ type: "SET_BOBA_COUNT", payload: count });
-  };
+  }, []);
 
-  const value: GameContextType = {
-    state,
-    selectDrink,
-    startGame,
-    endGame,
-    resetGame,
-    setBobaCount,
-  };
+  const value: GameContextType = useMemo(
+    () => ({
+      state,
+      selectDrink,
+      startGame,
+      endGame,
+      resetGame,
+      setBobaCount,
+    }),
+    [state, selectDrink, startGame, endGame, resetGame, setBobaCount]
+  );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }
