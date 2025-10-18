@@ -12,10 +12,9 @@ export class GameEngine {
 
   // Game state
   private cup!: Cup;
-  private isRunning: boolean = false;
+  private isRunning = false;
   private lastTime: number = 0;
   private animationFrameId: number | null = null;
-  private needsRender: boolean = true;
 
   // Modular components
   private objectPool: ObjectPool;
@@ -26,13 +25,16 @@ export class GameEngine {
   private selectedDrink: DrinkType | null = null;
 
   // Object dimensions
-  private cupWidth: number = 128;
-  private cupHeight: number = 160;
+  private cupWidth = 128;
+  private cupHeight = 160;
 
   // Performance tracking
-  private fps: number = 0;
-  private frameCount: number = 0;
-  private lastFpsUpdate: number = 0;
+  private fps = 0;
+  private frameCount = 0;
+  private lastFpsUpdate = 0;
+
+  // Performance optimizations
+  private frameSkipThreshold = 16.67; // Skip frames if delta > 16.67ms (60fps)
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -44,7 +46,7 @@ export class GameEngine {
     this.onGameEnd = onGameEnd;
 
     // Initialize modular components
-    this.objectPool = new ObjectPool(20);
+    this.objectPool = new ObjectPool(10); // Reduced pool size for better performance
     this.physicsEngine = new PhysicsEngine();
     this.assets = new AssetManager();
     this.renderEngine = new RenderEngine(canvas, this.assets);
@@ -65,24 +67,25 @@ export class GameEngine {
   }
 
   private initializeCup() {
+    // Use display dimensions, not high-DPI canvas dimensions
+    const rect = this.canvas.getBoundingClientRect();
     this.cup = {
-      x: (this.canvas.width - this.cupWidth) / 2,
-      y: this.canvas.height - this.cupHeight - 20,
+      x: (rect.width - this.cupWidth) / 2,
+      y: rect.height - this.cupHeight - 20,
       width: this.cupWidth,
       height: this.cupHeight,
     };
   }
 
-  public start() {
+  public async start(): Promise<void> {
     this.isRunning = true;
-    this.needsRender = true;
     this.frameCount = 0;
     this.lastFpsUpdate = performance.now();
     this.gameLogic.start();
-    // Preload assets in background; render falls back if missing
-    this.assets.preloadAll().then(() => {
-      this.needsRender = true;
-    });
+
+    // Preload all assets before starting game loop
+    await this.assets.preloadAll();
+
     this.gameLoop(0);
   }
 
@@ -98,7 +101,6 @@ export class GameEngine {
     this.isRunning = true;
     this.lastTime = 0;
     this.gameLogic.start();
-    this.needsRender = true;
     this.frameCount = 0;
     this.lastFpsUpdate = performance.now();
     this.gameLoop(0);
@@ -108,7 +110,7 @@ export class GameEngine {
     if (!this.isRunning) return;
 
     this.gameLogic.updateCupPosition(this.cup, input);
-    this.needsRender = true;
+    // Remove needsRender flag - always render for smooth gameplay
   }
 
   public resize() {
@@ -122,14 +124,10 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
+    // Simple, smooth game loop
     this.updateFPS(currentTime);
     this.update(deltaTime);
-
-    // Only render if something changed
-    if (this.needsRender) {
-      this.render();
-      this.needsRender = false;
-    }
+    this.render();
 
     this.animationFrameId = requestAnimationFrame((time) =>
       this.gameLoop(time)
@@ -153,9 +151,7 @@ export class GameEngine {
       return;
     }
 
-    if (result.needsRender) {
-      this.needsRender = true;
-    }
+    // Removed needsRender optimization for smoother gameplay
   }
 
   private render() {
@@ -198,6 +194,10 @@ export class GameEngine {
 
   public getBobaCount(): number {
     return this.gameLogic.getBobaCount();
+  }
+
+  public get running(): boolean {
+    return this.isRunning;
   }
 
   public destroy() {

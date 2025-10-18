@@ -2,7 +2,8 @@ import { FallingObject } from "../types";
 
 export class ObjectPool {
   private pool: FallingObject[] = [];
-  private activeObjects: Set<FallingObject> = new Set();
+  private activeObjects: FallingObject[] = [];
+  private activeCount = 0;
 
   constructor(private initialSize: number = 20) {
     this.initializePool();
@@ -46,28 +47,35 @@ export class ObjectPool {
       obj = this.createObject();
     }
 
-    this.activeObjects.add(obj);
+    this.activeObjects[this.activeCount] = obj;
+    this.activeCount++;
     return obj;
   }
 
   returnObject(obj: FallingObject) {
-    if (this.activeObjects.has(obj)) {
-      this.activeObjects.delete(obj);
-      this.resetObject(obj);
-      this.pool.push(obj);
+    // Find and remove object from active array
+    for (let i = 0; i < this.activeCount; i++) {
+      if (this.activeObjects[i] === obj) {
+        // Swap with last element and decrement count
+        this.activeObjects[i] = this.activeObjects[this.activeCount - 1];
+        this.activeCount--;
+        this.resetObject(obj);
+        this.pool.push(obj);
+        return;
+      }
     }
   }
 
   returnAllObjects() {
-    for (const obj of this.activeObjects) {
-      this.resetObject(obj);
-      this.pool.push(obj);
+    for (let i = 0; i < this.activeCount; i++) {
+      this.resetObject(this.activeObjects[i]);
+      this.pool.push(this.activeObjects[i]);
     }
-    this.activeObjects.clear();
+    this.activeCount = 0;
   }
 
   getActiveObjects(): FallingObject[] {
-    return Array.from(this.activeObjects);
+    return this.activeObjects.slice(0, this.activeCount);
   }
 
   getPoolSize(): number {
@@ -75,17 +83,17 @@ export class ObjectPool {
   }
 
   getActiveCount(): number {
-    return this.activeObjects.size;
+    return this.activeCount;
   }
 
   getTotalCount(): number {
-    return this.pool.length + this.activeObjects.size;
+    return this.pool.length + this.activeCount;
   }
 
   // Cleanup method for when the game ends
   destroy() {
     this.returnAllObjects();
     this.pool = [];
-    this.activeObjects.clear();
+    this.activeCount = 0;
   }
 }

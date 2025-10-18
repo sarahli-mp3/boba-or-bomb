@@ -6,10 +6,10 @@ export class GameLogic {
   private readonly TARGET_BOBA_COUNT = 10;
   private readonly CUP_SPEED = 400; // pixels per second
 
-  private bobaCount: number = 0;
-  private lastBobaCount: number = 0;
-  private gameStartTime: number = 0;
-  private gameTime: number = 0;
+  private bobaCount = 0;
+  private lastBobaCount = 0;
+  private gameStartTime = 0;
+  private gameTime = 0;
 
   constructor(
     private objectPool: ObjectPool,
@@ -32,7 +32,6 @@ export class GameLogic {
     cup: Cup
   ): { needsRender: boolean; gameEnded: boolean } {
     this.gameTime = performance.now() - this.gameStartTime;
-    let needsRender = false;
     let gameEnded = false;
 
     // Update physics
@@ -42,10 +41,9 @@ export class GameLogic {
     // Check for new object spawn
     if (this.physicsEngine.shouldSpawnObject(deltaTime)) {
       this.spawnObject();
-      needsRender = true;
     }
 
-    // Check collisions
+    // Check collisions - iterate backwards for safe removal
     for (let i = fallingObjects.length - 1; i >= 0; i--) {
       const obj = fallingObjects[i];
 
@@ -60,25 +58,26 @@ export class GameLogic {
 
         // Remove object after collision
         this.objectPool.returnObject(obj);
-        needsRender = true;
       }
     }
 
     // Remove off-screen objects
-    const removedCount = this.physicsEngine.removeOffScreenObjects(
-      fallingObjects,
-      window.innerHeight
-    );
-    if (removedCount > 0) {
-      needsRender = true;
-    }
+    const canvas = document.querySelector("canvas");
+    const canvasHeight = canvas
+      ? canvas.getBoundingClientRect().height
+      : window.innerHeight;
+    this.physicsEngine.removeOffScreenObjects(fallingObjects, canvasHeight);
 
-    return { needsRender, gameEnded };
+    return { needsRender: false, gameEnded };
   }
 
   private spawnObject() {
     const obj = this.objectPool.getObject();
-    const objectData = this.physicsEngine.generateObject(window.innerWidth, 64);
+    const canvas = document.querySelector("canvas");
+    const canvasWidth = canvas
+      ? canvas.getBoundingClientRect().width
+      : window.innerWidth;
+    const objectData = this.physicsEngine.generateObject(canvasWidth, 64);
 
     Object.assign(obj, objectData, {
       width: 64,
@@ -131,7 +130,11 @@ export class GameLogic {
       }
     }
 
-    // Clamp cup position
-    cup.x = Math.max(0, Math.min(window.innerWidth - cup.width, cup.x));
+    // Clamp cup position to canvas bounds
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      cup.x = Math.max(0, Math.min(rect.width - cup.width, cup.x));
+    }
   }
 }

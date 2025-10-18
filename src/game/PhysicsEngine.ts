@@ -1,14 +1,14 @@
 import { FallingObject, Cup } from "../types";
 
 export class PhysicsEngine {
-  private readonly FALLING_SPEED = 150; // pixels per second
-  private readonly SPAWN_INTERVAL = 600; // milliseconds
+  private readonly FALLING_SPEED = 150; // pixels per second - smooth gameplay
+  private readonly SPAWN_INTERVAL = 1000; // milliseconds - reasonable spawn rate
   private readonly BOMB_CHANCE = 0.2; // 20% chance
   // Active collision area for cup: wide and very short (no side hitboxes)
   private readonly CUP_ACTIVE_WIDTH_FRACTION = 0.6; // 60% of cup width (inset 20% per side)
   private readonly CUP_ACTIVE_HEIGHT_FRACTION = 0.15; // 15% of cup height at the top
 
-  private spawnTimer: number = 0;
+  private spawnTimer = 0;
 
   update(deltaTime: number, fallingObjects: FallingObject[]): void {
     // Update falling objects
@@ -43,37 +43,18 @@ export class PhysicsEngine {
   }
 
   checkCollision(obj: FallingObject, cup: Cup): boolean {
-    // Validate input parameters
-    if (!obj || !cup) {
+    // Fast bounds check first
+    if (obj.y + obj.height < cup.y || obj.y > cup.y + cup.height) {
       return false;
     }
-
-    // Ensure all required properties exist and are numbers
-    const objProps = ["x", "y", "width", "height"];
-    const cupProps = ["x", "y", "width", "height"];
-
-    for (const prop of objProps) {
-      if (
-        typeof obj[prop as keyof FallingObject] !== "number" ||
-        isNaN(obj[prop as keyof FallingObject] as number)
-      ) {
-        return false;
-      }
-    }
-
-    for (const prop of cupProps) {
-      if (
-        typeof cup[prop as keyof Cup] !== "number" ||
-        isNaN(cup[prop as keyof Cup] as number)
-      ) {
-        return false;
-      }
+    if (obj.x + obj.width < cup.x || obj.x > cup.x + cup.width) {
+      return false;
     }
 
     // Compute active collision rect for cup (centered, very short height at top)
     const activeCupWidth = cup.width * this.CUP_ACTIVE_WIDTH_FRACTION;
     const activeCupHeight = cup.height * this.CUP_ACTIVE_HEIGHT_FRACTION;
-    const activeCupX = cup.x + (cup.width - activeCupWidth) / 2;
+    const activeCupX = cup.x + (cup.width - activeCupWidth) * 0.5;
     const activeCupY = cup.y; // top of cup
 
     // Check overlap between object and active cup region only
@@ -90,12 +71,21 @@ export class PhysicsEngine {
     canvasHeight: number
   ): number {
     const initialLength = fallingObjects.length;
-    // Remove objects in reverse order to avoid index shifting
-    for (let i = fallingObjects.length - 1; i >= 0; i--) {
-      if (fallingObjects[i].y > canvasHeight + 100) {
-        fallingObjects.splice(i, 1);
+    const threshold = canvasHeight + 100;
+
+    // Use swap-and-pop for better performance
+    let writeIndex = 0;
+    for (let i = 0; i < fallingObjects.length; i++) {
+      if (fallingObjects[i].y <= threshold) {
+        if (writeIndex !== i) {
+          fallingObjects[writeIndex] = fallingObjects[i];
+        }
+        writeIndex++;
       }
     }
+
+    // Trim array to new length
+    fallingObjects.length = writeIndex;
     return initialLength - fallingObjects.length;
   }
 }

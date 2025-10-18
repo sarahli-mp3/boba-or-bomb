@@ -11,48 +11,52 @@ export function GameScreen() {
   const { state, endGame, setBobaCount } = useGame();
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || gameEngineRef.current) return;
 
-    // Create engine once if it doesn't exist
-    if (!gameEngineRef.current) {
-      const canvas = canvasRef.current;
-      const gameEngine = new GameEngine(
-        canvas,
-        endGame,
-        setBobaCount,
-        state.selectedDrink
-      );
-      const inputHandler = new InputHandler(canvas, (input: InputState) => {
-        gameEngine.updateInput(input);
-      });
+    const canvas = canvasRef.current;
+    const gameEngine = new GameEngine(
+      canvas,
+      endGame,
+      setBobaCount,
+      state.selectedDrink
+    );
+    const inputHandler = new InputHandler(canvas, (input: InputState) => {
+      gameEngine.updateInput(input);
+    });
 
-      gameEngineRef.current = gameEngine;
-      inputHandlerRef.current = inputHandler;
+    gameEngineRef.current = gameEngine;
+    inputHandlerRef.current = inputHandler;
 
-      const handleResize = () => gameEngine.resize();
-      window.addEventListener("resize", handleResize);
+    const handleResize = () => gameEngine.resize();
+    window.addEventListener("resize", handleResize);
 
-      // Start immediately if drink is selected
-      if (state.selectedDrink) {
-        gameEngine.start();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (gameEngineRef.current) {
+        gameEngineRef.current.destroy();
+        gameEngineRef.current = null;
       }
+      if (inputHandlerRef.current) {
+        inputHandlerRef.current.destroy();
+        inputHandlerRef.current = null;
+      }
+    };
+  }, []); // Only run once on mount
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        if (gameEngineRef.current) {
-          gameEngineRef.current.destroy();
-          gameEngineRef.current = null;
-        }
-        if (inputHandlerRef.current) {
-          inputHandlerRef.current.destroy();
-          inputHandlerRef.current = null;
-        }
-      };
-    } else if (state.selectedDrink) {
-      // Engine exists, just restart for new round
+  // Separate effect for starting/restarting game
+  useEffect(() => {
+    if (!state.selectedDrink || !gameEngineRef.current) return;
+
+    if (gameEngineRef.current.running) {
+      // Restart existing game
       gameEngineRef.current.restart();
+    } else {
+      // Start new game
+      gameEngineRef.current.start().catch((error) => {
+        console.error("Game start failed:", error);
+      });
     }
-  }, [state.selectedDrink]); // Trigger on selectedDrink changes
+  }, [state.selectedDrink]);
 
   return (
     <div className="game-screen">
