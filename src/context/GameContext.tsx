@@ -16,6 +16,7 @@ interface GameContextType {
   resetGame: () => void;
   setBobaCount: (count: number) => void;
   setLives: (lives: number) => void;
+  setTargetBobaCount: (count: number) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -26,7 +27,8 @@ type GameAction =
   | { type: "END_GAME"; payload: GameResult }
   | { type: "RESET_GAME" }
   | { type: "SET_BOBA_COUNT"; payload: number }
-  | { type: "SET_LIVES"; payload: number };
+  | { type: "SET_LIVES"; payload: number }
+  | { type: "SET_TARGET_BOBA_COUNT"; payload: number };
 
 const initialState: GameState = {
   currentScreen: "start",
@@ -34,6 +36,7 @@ const initialState: GameState = {
   lastResult: null,
   bobaCount: 0,
   lives: 3,
+  targetBobaCount: 10,
 };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -64,6 +67,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         lastResult: null,
         bobaCount: 0,
         lives: 3,
+        targetBobaCount: 10,
       };
     case "SET_BOBA_COUNT":
       return {
@@ -74,6 +78,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         lives: action.payload,
+      };
+    case "SET_TARGET_BOBA_COUNT":
+      return {
+        ...state,
+        targetBobaCount: action.payload,
       };
     default:
       return state;
@@ -111,6 +120,10 @@ export function GameProvider({ children }: GameProviderProps) {
     dispatch({ type: "SET_LIVES", payload: lives });
   }, []);
 
+  const setTargetBobaCount = useCallback((count: number) => {
+    dispatch({ type: "SET_TARGET_BOBA_COUNT", payload: count });
+  }, []);
+
   const value: GameContextType = useMemo(
     () => ({
       state,
@@ -120,8 +133,18 @@ export function GameProvider({ children }: GameProviderProps) {
       resetGame,
       setBobaCount,
       setLives,
+      setTargetBobaCount,
     }),
-    [state, selectDrink, startGame, endGame, resetGame, setBobaCount, setLives]
+    [
+      state,
+      selectDrink,
+      startGame,
+      endGame,
+      resetGame,
+      setBobaCount,
+      setLives,
+      setTargetBobaCount,
+    ]
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

@@ -1,16 +1,19 @@
-import { FallingObject, Cup } from "../types";
+import { FallingObject, Cup, DrinkType } from "../types";
 import { ObjectPool } from "./ObjectPool";
 import { PhysicsEngine } from "./PhysicsEngine";
 
 export class GameLogic {
-  private readonly TARGET_BOBA_COUNT = 10;
   private readonly CUP_SPEED = 400; // pixels per second
+  private targetBobaCount = 10; // Default for taro (Easy)
 
   private bobaCount = 0;
   private lastBobaCount = 0;
   private gameStartTime = 0;
   private gameTime = 0;
   private lives = 3;
+  private currentDrinkType: DrinkType | null = null;
+  private speedBoostApplied = false;
+  private hardDifficultySpeedBoosts = 0; // Track how many speed boosts have been applied for hard difficulty
 
   constructor(
     private objectPool: ObjectPool,
@@ -27,6 +30,8 @@ export class GameLogic {
     this.gameStartTime = performance.now();
     this.gameTime = 0;
     this.lives = 3;
+    this.speedBoostApplied = false;
+    this.hardDifficultySpeedBoosts = 0;
     this.objectPool.returnAllObjects();
     this.onBobaCountChange(0);
     this.onLivesChange(3);
@@ -120,7 +125,44 @@ export class GameLogic {
       this.onBobaCountChange(this.bobaCount);
     }
 
-    if (this.bobaCount >= this.TARGET_BOBA_COUNT) {
+    // Check for speed boost on medium difficulty at 10 boba
+    if (
+      this.currentDrinkType === "milk_tea" &&
+      this.bobaCount === 10 &&
+      !this.speedBoostApplied
+    ) {
+      this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase
+      this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase
+      this.speedBoostApplied = true;
+    }
+
+    // Check for progressive speed and frequency boosts on hard difficulty
+    if (this.currentDrinkType === "matcha") {
+      if (this.bobaCount === 10 && this.hardDifficultySpeedBoosts === 0) {
+        this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase
+        this.hardDifficultySpeedBoosts = 1;
+      } else if (
+        this.bobaCount === 20 &&
+        this.hardDifficultySpeedBoosts === 1
+      ) {
+        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase (not 10%)
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase
+        this.hardDifficultySpeedBoosts = 2;
+      } else if (
+        this.bobaCount === 30 &&
+        this.hardDifficultySpeedBoosts === 2
+      ) {
+        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase (not 10%)
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase
+        this.hardDifficultySpeedBoosts = 3;
+      }
+    }
+
+    if (this.bobaCount >= this.targetBobaCount) {
+      console.log(
+        `Game won! Boba count: ${this.bobaCount}, Target: ${this.targetBobaCount}, Drink: ${this.currentDrinkType}`
+      );
       this.onGameEnd("win");
     }
   }
@@ -165,6 +207,35 @@ export class GameLogic {
 
   getLives(): number {
     return this.lives;
+  }
+
+  setTargetBobaCount(drinkType: DrinkType | null): void {
+    this.currentDrinkType = drinkType;
+    this.speedBoostApplied = false; // Reset speed boost when drink changes
+    this.hardDifficultySpeedBoosts = 0; // Reset hard difficulty speed boosts
+
+    switch (drinkType) {
+      case "taro":
+        this.targetBobaCount = 10; // Easy
+        break;
+      case "milk_tea":
+        this.targetBobaCount = 20; // Medium
+        break;
+      case "matcha":
+        this.targetBobaCount = 40; // Hard
+        break;
+      default:
+        this.targetBobaCount = 10; // Default to easy
+        break;
+    }
+
+    console.log(
+      `Target boba count set to: ${this.targetBobaCount} for drink: ${drinkType}`
+    );
+  }
+
+  getTargetBobaCount(): number {
+    return this.targetBobaCount;
   }
 
   updateCupPosition(

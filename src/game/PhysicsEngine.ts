@@ -1,7 +1,7 @@
 import { FallingObject, Cup } from "../types";
 
 export class PhysicsEngine {
-  private readonly FALLING_SPEED = 150; // pixels per second - smooth gameplay
+  private readonly BASE_FALLING_SPEED = 150; // pixels per second - smooth gameplay
   private readonly SPAWN_INTERVAL = 1000; // milliseconds - reasonable spawn rate
   private readonly BOMB_CHANCE = 0.2; // 20% chance
   private readonly HEART_CHANCE = 0.05; // 5% chance for heart power-up
@@ -10,17 +10,22 @@ export class PhysicsEngine {
   private readonly CUP_ACTIVE_HEIGHT_FRACTION = 0.15; // 15% of cup height at the top
 
   private spawnTimer = 0;
+  private speedMultiplier = 1.0; // Default speed multiplier
+  private spawnFrequencyMultiplier = 1.0; // Default spawn frequency multiplier
 
   update(deltaTime: number, fallingObjects: FallingObject[]): void {
     // Update falling objects
+    const currentFallingSpeed = this.BASE_FALLING_SPEED * this.speedMultiplier;
     fallingObjects.forEach((obj) => {
-      obj.y += (this.FALLING_SPEED * deltaTime) / 1000;
+      obj.y += (currentFallingSpeed * deltaTime) / 1000;
     });
   }
 
   shouldSpawnObject(deltaTime: number): boolean {
     this.spawnTimer += deltaTime;
-    if (this.spawnTimer >= this.SPAWN_INTERVAL) {
+    const adjustedSpawnInterval =
+      this.SPAWN_INTERVAL / this.spawnFrequencyMultiplier;
+    if (this.spawnTimer >= adjustedSpawnInterval) {
       this.spawnTimer = 0;
       return true;
     }
@@ -47,7 +52,7 @@ export class PhysicsEngine {
       x: Math.max(0, x),
       y: -64, // Start above screen
       vx: 0,
-      vy: this.FALLING_SPEED,
+      vy: this.BASE_FALLING_SPEED * this.speedMultiplier,
       type,
     };
   }
@@ -97,5 +102,21 @@ export class PhysicsEngine {
     // Trim array to new length
     fallingObjects.length = writeIndex;
     return initialLength - fallingObjects.length;
+  }
+
+  setSpeedMultiplier(multiplier: number): void {
+    this.speedMultiplier = multiplier;
+  }
+
+  increaseSpeedMultiplier(increase: number): void {
+    this.speedMultiplier += increase;
+  }
+
+  setSpawnFrequencyMultiplier(multiplier: number): void {
+    this.spawnFrequencyMultiplier = multiplier;
+  }
+
+  increaseSpawnFrequencyMultiplier(increase: number): void {
+    this.spawnFrequencyMultiplier += increase;
   }
 }

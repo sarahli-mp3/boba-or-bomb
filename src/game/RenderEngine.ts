@@ -198,7 +198,7 @@ export class RenderEngine {
   }
 
   drawCupFill(cup: Cup, bobaCount: number) {
-    if (bobaCount > 0 && bobaCount <= 10) {
+    if (bobaCount > 0) {
       // Use group images progressively
       // 1st pearl: show first overlay (1.PNG)
       // 2nd pearl: show Group 1
@@ -217,11 +217,14 @@ export class RenderEngine {
         // 3 pearls -> Group 3 (index 2)
         // 4 pearls -> Group 4 (index 3)
         // etc.
+        // For 10+ pearls, show the maximum overlay (Group 9, which is for 10 pearls)
         let groupIndex: number;
         if (bobaCount === 2) {
           groupIndex = 0; // Group 1
         } else if (bobaCount >= 3) {
-          groupIndex = bobaCount - 1; // Group 3, 4, 5, etc.
+          // Cap at 10 pearls for the overlay (Group 9 is the last available)
+          const cappedCount = Math.min(bobaCount, 10);
+          groupIndex = cappedCount - 1; // Group 3, 4, 5, etc., capped at Group 9
         } else {
           groupIndex = -1; // Invalid
         }

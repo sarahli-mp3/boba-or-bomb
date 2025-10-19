@@ -10,6 +10,7 @@ export interface GameState {
   lastResult: GameResult | null;
   bobaCount: number;
   lives: number;
+  targetBobaCount: number;
 }
 
 export interface FallingObject {

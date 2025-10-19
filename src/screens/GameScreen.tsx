@@ -8,7 +8,8 @@ export function GameScreen() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const inputHandlerRef = useRef<InputHandler | null>(null);
-  const { state, endGame, setBobaCount, setLives } = useGame();
+  const { state, endGame, setBobaCount, setLives, setTargetBobaCount } =
+    useGame();
   const [showMaxLivesAnimation, setShowMaxLivesAnimation] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,8 @@ export function GameScreen() {
       setBobaCount,
       setLives,
       state.selectedDrink,
-      () => setShowMaxLivesAnimation(true)
+      () => setShowMaxLivesAnimation(true),
+      setTargetBobaCount
     );
     const inputHandler = new InputHandler(canvas, (input: InputState) => {
       gameEngine.updateInput(input);
@@ -49,6 +51,9 @@ export function GameScreen() {
   // Separate effect for starting/restarting game
   useEffect(() => {
     if (!state.selectedDrink || !gameEngineRef.current) return;
+
+    // Update the selected drink and speed
+    gameEngineRef.current.updateSelectedDrink(state.selectedDrink);
 
     if (gameEngineRef.current.running) {
       // Restart existing game
@@ -95,7 +100,9 @@ export function GameScreen() {
             />
           ))}
         </div>
-        <div className="boba-count">Boba: {state.bobaCount}/10</div>
+        <div className="boba-count">
+          Boba: {state.bobaCount}/{state.targetBobaCount}
+        </div>
       </div>
       <canvas
         ref={canvasRef}

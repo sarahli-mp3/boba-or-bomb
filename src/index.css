@@ -70,6 +70,13 @@ body {
   flex-wrap: wrap;
 }
 
+.drink-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
 .drink-button {
   background: #f0f0f0;
   border: 2px solid #333;
@@ -104,6 +111,16 @@ body {
 .drink-name {
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.drink-difficulty-label {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #666;
+  text-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
 }
 
 /* Game Screen */
@@ -333,6 +350,10 @@ body {
     gap: 1rem;
   }
 
+  .drink-difficulty-label {
+    font-size: 0.8rem;
+  }
+
   .drink-button {
     min-width: 200px;
   }
@@ -368,5 +389,9 @@ body {
 
   .drink-name {
     font-size: 0.8rem;
+  }
+
+  .drink-difficulty-label {
+    font-size: 0.7rem;
   }
 }

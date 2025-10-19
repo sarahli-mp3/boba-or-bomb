@@ -23,6 +23,7 @@ export class GameEngine {
   private gameLogic: GameLogic;
   private assets: AssetManager;
   private selectedDrink: DrinkType | null = null;
+  private onTargetBobaCountChange?: (count: number) => void;
 
   // Object dimensions
   private cupWidth = 128;
@@ -42,10 +43,12 @@ export class GameEngine {
     onBobaCountChange: (count: number) => void,
     onLivesChange: (lives: number) => void,
     selectedDrink?: DrinkType | null,
-    onMaxLivesReached?: () => void
+    onMaxLivesReached?: () => void,
+    onTargetBobaCountChange?: (count: number) => void
   ) {
     this.canvas = canvas;
     this.onGameEnd = onGameEnd;
+    this.onTargetBobaCountChange = onTargetBobaCountChange;
 
     // Initialize modular components
     this.objectPool = new ObjectPool(10); // Reduced pool size for better performance
@@ -64,6 +67,8 @@ export class GameEngine {
 
     this.setupCanvas();
     this.initializeCup();
+    this.setDifficultySpeed();
+    this.gameLogic.setTargetBobaCount(this.selectedDrink);
   }
 
   private setupCanvas() {
@@ -107,6 +112,7 @@ export class GameEngine {
     this.gameLogic.start();
     this.frameCount = 0;
     this.lastFpsUpdate = performance.now();
+    this.setDifficultySpeed();
     this.gameLoop(0);
   }
 
@@ -115,6 +121,12 @@ export class GameEngine {
 
     this.gameLogic.updateCupPosition(this.cup, input);
     // Remove needsRender flag - always render for smooth gameplay
+  }
+
+  public updateSelectedDrink(drink: DrinkType | null) {
+    this.selectedDrink = drink;
+    this.setDifficultySpeed();
+    this.gameLogic.setTargetBobaCount(drink);
   }
 
   public resize() {
@@ -197,6 +209,35 @@ export class GameEngine {
 
   public get running(): boolean {
     return this.isRunning;
+  }
+
+  private setDifficultySpeed() {
+    let speedMultiplier = 1.0; // Default for taro (Easy)
+    let targetBobaCount = 10; // Default for taro (Easy)
+
+    switch (this.selectedDrink) {
+      case "taro":
+        speedMultiplier = 1.0; // Easy - base speed
+        targetBobaCount = 10; // Easy
+        break;
+      case "milk_tea":
+        speedMultiplier = 1.2; // Medium - 20% faster than taro
+        targetBobaCount = 20; // Medium
+        break;
+      case "matcha":
+        speedMultiplier = 1.5; // Hard - 50% faster than taro
+        targetBobaCount = 40; // Hard
+        break;
+      default:
+        speedMultiplier = 1.0;
+        targetBobaCount = 10;
+        break;
+    }
+
+    this.physicsEngine.setSpeedMultiplier(speedMultiplier);
+    this.physicsEngine.setSpawnFrequencyMultiplier(1.0); // Reset spawn frequency
+    this.gameLogic.setTargetBobaCount(this.selectedDrink);
+    this.onTargetBobaCountChange?.(targetBobaCount);
   }
 
   public destroy() {
