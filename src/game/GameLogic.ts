@@ -69,12 +69,30 @@ export class GameLogic {
       }
     }
 
-    // Remove off-screen objects
+    // Remove off-screen objects and treat missed boba like hitting a bomb
     const canvas = document.querySelector("canvas");
     const canvasHeight = canvas
       ? canvas.getBoundingClientRect().height
       : window.innerHeight;
-    this.physicsEngine.removeOffScreenObjects(fallingObjects, canvasHeight);
+    const threshold = canvasHeight + 100;
+
+    // Get a fresh snapshot after collision handling
+    const remainingObjects = this.objectPool.getActiveObjects();
+    for (let i = 0; i < remainingObjects.length; i++) {
+      const obj = remainingObjects[i];
+      if (obj.y > threshold) {
+        if (obj.type === "boba") {
+          // Missing a pearl has the exact same effect as hitting a bomb
+          this.handleBombCollision();
+          if (this.lives <= 0) {
+            gameEnded = true;
+          }
+        }
+        // Always return off-screen objects to the pool
+        this.objectPool.returnObject(obj);
+        if (gameEnded) break;
+      }
+    }
 
     return { needsRender: false, gameEnded };
   }

@@ -24,7 +24,7 @@ export function ResultScreen() {
           {isWin ? (
             <p>Congratulations! You caught 10 boba pearls!</p>
           ) : (
-            <p>Oh no! You hit a bomb!</p>
+            <p>You spilled your drink!</p>
           )}
         </div>
 
