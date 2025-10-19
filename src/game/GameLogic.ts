@@ -157,30 +157,30 @@ export class GameLogic {
       this.bobaCount === 10 &&
       !this.speedBoostApplied
     ) {
-      this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase
-      this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase
+      this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase on top of 20% harder base
+      this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase on top of 20% harder base
       this.speedBoostApplied = true;
     }
 
     // Check for progressive speed and frequency boosts on hard difficulty
     if (this.currentDrinkType === "matcha") {
       if (this.bobaCount === 10 && this.hardDifficultySpeedBoosts === 0) {
-        this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase
-        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase
+        this.physicsEngine.increaseSpeedMultiplier(0.1); // 10% speed increase on top of 20% harder base
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.1); // 10% boba frequency increase on top of 20% harder base
         this.hardDifficultySpeedBoosts = 1;
       } else if (
         this.bobaCount === 20 &&
         this.hardDifficultySpeedBoosts === 1
       ) {
-        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase (not 10%)
-        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase
+        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase on top of 20% harder base
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase on top of 20% harder base
         this.hardDifficultySpeedBoosts = 2;
       } else if (
         this.bobaCount === 30 &&
         this.hardDifficultySpeedBoosts === 2
       ) {
-        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase (not 10%)
-        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase
+        this.physicsEngine.increaseSpeedMultiplier(0.2); // 20% speed increase on top of 20% harder base
+        this.physicsEngine.increaseSpawnFrequencyMultiplier(0.05); // 5% boba frequency increase on top of 20% harder base
         this.hardDifficultySpeedBoosts = 3;
       }
     }

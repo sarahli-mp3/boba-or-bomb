@@ -216,30 +216,30 @@ export class GameEngine {
   }
 
   private setDifficultySpeed() {
-    let speedMultiplier = 1.0; // Default for taro (Easy)
+    let speedMultiplier = 1.2; // Default for taro (Easy) - 20% harder base
     let targetBobaCount = 10; // Default for taro (Easy)
 
     switch (this.selectedDrink) {
       case "taro":
-        speedMultiplier = 1.0; // Easy - base speed
+        speedMultiplier = 1.2; // Easy - 20% harder base speed
         targetBobaCount = 10; // Easy
         break;
       case "milk_tea":
-        speedMultiplier = 1.2; // Medium - 20% faster than taro
+        speedMultiplier = 1.44; // Medium - 20% faster than new taro base (1.2 * 1.2)
         targetBobaCount = 20; // Medium
         break;
       case "matcha":
-        speedMultiplier = 1.5; // Hard - 50% faster than taro
+        speedMultiplier = 1.8; // Hard - 50% faster than new taro base (1.2 * 1.5)
         targetBobaCount = 40; // Hard
         break;
       default:
-        speedMultiplier = 1.0;
+        speedMultiplier = 1.2;
         targetBobaCount = 10;
         break;
     }
 
     this.physicsEngine.setSpeedMultiplier(speedMultiplier);
-    this.physicsEngine.setSpawnFrequencyMultiplier(1.0); // Reset spawn frequency
+    this.physicsEngine.setSpawnFrequencyMultiplier(1.2); // 20% harder base spawn frequency
     this.gameLogic.setTargetBobaCount(this.selectedDrink);
     this.onTargetBobaCountChange?.(targetBobaCount);
   }

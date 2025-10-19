@@ -22,7 +22,7 @@ export function ResultScreen() {
 
         <div className="result-message">
           {isWin ? (
-            <p>Congratulations! You caught 10 boba pearls!</p>
+            <p>Congratulations! You caught all the boba pearls!</p>
           ) : (
             <p>You spilled your drink!</p>
           )}

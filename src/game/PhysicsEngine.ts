@@ -1,9 +1,9 @@
 import { FallingObject, Cup } from "../types";
 
 export class PhysicsEngine {
-  private readonly BASE_FALLING_SPEED = 150; // pixels per second - smooth gameplay
-  private readonly SPAWN_INTERVAL = 1000; // milliseconds - reasonable spawn rate
-  private readonly BOMB_CHANCE = 0.2; // 20% chance
+  private readonly BASE_FALLING_SPEED = 180; // pixels per second - 20% faster base speed
+  private readonly SPAWN_INTERVAL = 833; // milliseconds - 20% faster spawn rate (1000/1.2)
+  private readonly BOMB_CHANCE = 0.22; // 22% chance (20% + 10% more bombs)
   private readonly HEART_CHANCE = 0.05; // 5% chance for heart power-up
   // Active collision area for cup: wide and very short (no side hitboxes)
   private readonly CUP_ACTIVE_WIDTH_FRACTION = 0.6; // 60% of cup width (inset 20% per side)
