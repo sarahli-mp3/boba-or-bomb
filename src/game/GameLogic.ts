@@ -82,8 +82,8 @@ export class GameLogic {
       const obj = remainingObjects[i];
       if (obj.y > threshold) {
         if (obj.type === "boba") {
-          // Missing a pearl has the exact same effect as hitting a bomb
-          this.handleBombCollision();
+          // Missing a pearl costs one life (not instant death)
+          this.loseOneLife();
           if (this.lives <= 0) {
             gameEnded = true;
           }
@@ -124,13 +124,19 @@ export class GameLogic {
     }
   }
 
-  private handleBombCollision() {
+  private loseOneLife() {
     this.lives--;
     this.onLivesChange(this.lives);
-
     if (this.lives <= 0) {
       this.onGameEnd("lose");
     }
+  }
+
+  private handleBombCollision() {
+    // Bombs now cause instant death regardless of remaining lives
+    this.lives = 0;
+    this.onLivesChange(this.lives);
+    this.onGameEnd("lose");
   }
 
   private handleHeartCollision() {
