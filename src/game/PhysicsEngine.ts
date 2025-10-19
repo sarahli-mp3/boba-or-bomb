@@ -4,6 +4,7 @@ export class PhysicsEngine {
   private readonly FALLING_SPEED = 150; // pixels per second - smooth gameplay
   private readonly SPAWN_INTERVAL = 1000; // milliseconds - reasonable spawn rate
   private readonly BOMB_CHANCE = 0.2; // 20% chance
+  private readonly HEART_CHANCE = 0.05; // 5% chance for heart power-up
   // Active collision area for cup: wide and very short (no side hitboxes)
   private readonly CUP_ACTIVE_WIDTH_FRACTION = 0.6; // 60% of cup width (inset 20% per side)
   private readonly CUP_ACTIVE_HEIGHT_FRACTION = 0.15; // 15% of cup height at the top
@@ -31,7 +32,16 @@ export class PhysicsEngine {
     objectWidth: number
   ): Partial<FallingObject> {
     const x = Math.random() * (canvasWidth - objectWidth);
-    const type = Math.random() < this.BOMB_CHANCE ? "bomb" : "boba";
+    const random = Math.random();
+    let type: "boba" | "bomb" | "heart";
+
+    if (random < this.HEART_CHANCE) {
+      type = "heart";
+    } else if (random < this.HEART_CHANCE + this.BOMB_CHANCE) {
+      type = "bomb";
+    } else {
+      type = "boba";
+    }
 
     return {
       x: Math.max(0, x),

@@ -8,7 +8,7 @@ export function GameScreen() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const inputHandlerRef = useRef<InputHandler | null>(null);
-  const { state, endGame, setBobaCount } = useGame();
+  const { state, endGame, setBobaCount, setLives } = useGame();
 
   useEffect(() => {
     if (!canvasRef.current || gameEngineRef.current) return;
@@ -18,6 +18,7 @@ export function GameScreen() {
       canvas,
       endGame,
       setBobaCount,
+      setLives,
       state.selectedDrink
     );
     const inputHandler = new InputHandler(canvas, (input: InputState) => {
@@ -61,6 +62,25 @@ export function GameScreen() {
   return (
     <div className="game-screen">
       <div className="game-hud">
+        <div className="lives-display">
+          {Array.from({ length: Math.max(3, state.lives) }, (_, i) => (
+            <img
+              key={i}
+              src="/assets/pixelheart.png"
+              alt="Life"
+              className={`life-heart ${
+                i < state.lives ? "active" : "inactive"
+              }`}
+              style={{
+                width: "32px",
+                height: "32px",
+                marginRight: "8px",
+                filter:
+                  i < state.lives ? "none" : "grayscale(100%) opacity(0.3)",
+              }}
+            />
+          ))}
+        </div>
         <div className="boba-count">Boba: {state.bobaCount}/10</div>
       </div>
       <canvas

@@ -34,12 +34,13 @@ export class GameEngine {
   private lastFpsUpdate = 0;
 
   // Performance optimizations
-  private frameSkipThreshold = 16.67; // Skip frames if delta > 16.67ms (60fps)
+  // private frameSkipThreshold = 16.67; // Skip frames if delta > 16.67ms (60fps)
 
   constructor(
     canvas: HTMLCanvasElement,
     onGameEnd: (result: "win" | "lose") => void,
     onBobaCountChange: (count: number) => void,
+    onLivesChange: (lives: number) => void,
     selectedDrink?: DrinkType | null
   ) {
     this.canvas = canvas;
@@ -54,6 +55,7 @@ export class GameEngine {
       this.objectPool,
       this.physicsEngine,
       onBobaCountChange,
+      onLivesChange,
       onGameEnd
     );
     this.selectedDrink = selectedDrink ?? null;

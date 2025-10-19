@@ -72,12 +72,19 @@ export class RenderEngine {
         } else {
           this.drawBoba(obj);
         }
-      } else {
+      } else if (obj.type === "bomb") {
         const img = this.assets.getItemImage("bomb");
         if (img) {
           this.drawImage(img, obj.x, obj.y, obj.width, obj.height);
         } else {
           this.drawBomb(obj);
+        }
+      } else if (obj.type === "heart") {
+        const img = this.assets.getItemImage("heart");
+        if (img) {
+          this.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+        } else {
+          this.drawHeart(obj);
         }
       }
     });
@@ -110,6 +117,41 @@ export class RenderEngine {
   private drawBomb(obj: FallingObject) {
     this.ctx.fillStyle = "#FF0000"; // Red for bomb
     this.ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+  }
+
+  private drawHeart(obj: FallingObject) {
+    // Draw a simple heart shape
+    this.ctx.fillStyle = "#FF69B4"; // Pink for heart
+    this.ctx.beginPath();
+
+    const centerX = obj.x + obj.width / 2;
+    const centerY = obj.y + obj.height / 2;
+    const radius = obj.width / 4;
+
+    // Draw heart shape using two circles and a triangle
+    this.ctx.arc(
+      centerX - radius / 2,
+      centerY - radius / 2,
+      radius,
+      0,
+      2 * Math.PI
+    );
+    this.ctx.arc(
+      centerX + radius / 2,
+      centerY - radius / 2,
+      radius,
+      0,
+      2 * Math.PI
+    );
+    this.ctx.fill();
+
+    // Draw triangle for bottom of heart
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX, centerY + radius);
+    this.ctx.lineTo(centerX - radius, centerY);
+    this.ctx.lineTo(centerX + radius, centerY);
+    this.ctx.closePath();
+    this.ctx.fill();
   }
 
   private drawImage(

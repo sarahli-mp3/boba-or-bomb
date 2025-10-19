@@ -10,11 +10,13 @@ export class GameLogic {
   private lastBobaCount = 0;
   private gameStartTime = 0;
   private gameTime = 0;
+  private lives = 3;
 
   constructor(
     private objectPool: ObjectPool,
     private physicsEngine: PhysicsEngine,
     private onBobaCountChange: (count: number) => void,
+    private onLivesChange: (lives: number) => void,
     private onGameEnd: (result: "win" | "lose") => void
   ) {}
 
@@ -23,8 +25,10 @@ export class GameLogic {
     this.lastBobaCount = 0;
     this.gameStartTime = performance.now();
     this.gameTime = 0;
+    this.lives = 3;
     this.objectPool.returnAllObjects();
     this.onBobaCountChange(0);
+    this.onLivesChange(3);
   }
 
   update(
@@ -52,8 +56,12 @@ export class GameLogic {
           this.handleBobaCollision();
         } else if (obj.type === "bomb") {
           this.handleBombCollision();
-          gameEnded = true;
-          break;
+          if (this.lives <= 0) {
+            gameEnded = true;
+            break;
+          }
+        } else if (obj.type === "heart") {
+          this.handleHeartCollision();
         }
 
         // Remove object after collision
@@ -99,7 +107,18 @@ export class GameLogic {
   }
 
   private handleBombCollision() {
-    this.onGameEnd("lose");
+    this.lives--;
+    this.onLivesChange(this.lives);
+
+    if (this.lives <= 0) {
+      this.onGameEnd("lose");
+    }
+  }
+
+  private handleHeartCollision() {
+    // Add a life, but cap at maximum of 5 lives
+    this.lives = Math.min(this.lives + 1, 5);
+    this.onLivesChange(this.lives);
   }
 
   getBobaCount(): number {
@@ -112,6 +131,10 @@ export class GameLogic {
 
   getFallingObjects(): FallingObject[] {
     return this.objectPool.getActiveObjects();
+  }
+
+  getLives(): number {
+    return this.lives;
   }
 
   updateCupPosition(

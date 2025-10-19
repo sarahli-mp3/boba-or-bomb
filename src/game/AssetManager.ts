@@ -45,6 +45,11 @@ export class AssetManager {
         "/assets/bomb.png",
         (img: HTMLImageElement) => (this.itemImages["bomb"] = img),
       ],
+      [
+        "items:heart",
+        "/assets/pixelheart.png",
+        (img: HTMLImageElement) => (this.itemImages["heart"] = img),
+      ],
     ];
 
     // Load cup overlay images (1-10 pearls)
@@ -111,7 +116,7 @@ export class AssetManager {
     });
   }
 
-  getItemImage(kind: "boba" | "bomb"): HTMLImageElement | null {
+  getItemImage(kind: "boba" | "bomb" | "heart"): HTMLImageElement | null {
     const img = this.itemImages[kind];
     if (!img || img.naturalWidth === 0 || img.naturalHeight === 0) return null;
     return img;

@@ -9,6 +9,7 @@ export interface GameState {
   selectedDrink: DrinkType | null;
   lastResult: GameResult | null;
   bobaCount: number;
+  lives: number;
 }
 
 export interface FallingObject {
@@ -18,7 +19,7 @@ export interface FallingObject {
   vy: number;
   width: number;
   height: number;
-  type: "boba" | "bomb";
+  type: "boba" | "bomb" | "heart";
 }
 
 export interface Cup {
