@@ -159,6 +159,30 @@ body {
   }
 }
 
+.life-heart.max-lives-animation {
+  animation: maxLivesShake 0.5s ease-in-out;
+}
+
+@keyframes maxLivesShake {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: scale(1.2) rotate(5deg);
+  }
+}
+
 .boba-count {
   text-align: center;
 }

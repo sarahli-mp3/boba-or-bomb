@@ -17,7 +17,8 @@ export class GameLogic {
     private physicsEngine: PhysicsEngine,
     private onBobaCountChange: (count: number) => void,
     private onLivesChange: (lives: number) => void,
-    private onGameEnd: (result: "win" | "lose") => void
+    private onGameEnd: (result: "win" | "lose") => void,
+    private onMaxLivesReached?: () => void
   ) {}
 
   start() {
@@ -140,9 +141,14 @@ export class GameLogic {
   }
 
   private handleHeartCollision() {
-    // Add a life, but cap at maximum of 5 lives
-    this.lives = Math.min(this.lives + 1, 5);
-    this.onLivesChange(this.lives);
+    // Add a life, but cap at maximum of 3 lives
+    if (this.lives < 3) {
+      this.lives = Math.min(this.lives + 1, 3);
+      this.onLivesChange(this.lives);
+    } else {
+      // Player already has max lives, trigger animation
+      this.onMaxLivesReached?.();
+    }
   }
 
   getBobaCount(): number {

@@ -41,7 +41,8 @@ export class GameEngine {
     onGameEnd: (result: "win" | "lose") => void,
     onBobaCountChange: (count: number) => void,
     onLivesChange: (lives: number) => void,
-    selectedDrink?: DrinkType | null
+    selectedDrink?: DrinkType | null,
+    onMaxLivesReached?: () => void
   ) {
     this.canvas = canvas;
     this.onGameEnd = onGameEnd;
@@ -56,7 +57,8 @@ export class GameEngine {
       this.physicsEngine,
       onBobaCountChange,
       onLivesChange,
-      onGameEnd
+      onGameEnd,
+      onMaxLivesReached
     );
     this.selectedDrink = selectedDrink ?? null;
 

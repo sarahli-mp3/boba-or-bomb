@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGame } from "../context/GameContext";
 import { GameEngine } from "../game/engine";
 import { InputHandler } from "../game/input";
@@ -9,6 +9,7 @@ export function GameScreen() {
   const gameEngineRef = useRef<GameEngine | null>(null);
   const inputHandlerRef = useRef<InputHandler | null>(null);
   const { state, endGame, setBobaCount, setLives } = useGame();
+  const [showMaxLivesAnimation, setShowMaxLivesAnimation] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current || gameEngineRef.current) return;
@@ -19,7 +20,8 @@ export function GameScreen() {
       endGame,
       setBobaCount,
       setLives,
-      state.selectedDrink
+      state.selectedDrink,
+      () => setShowMaxLivesAnimation(true)
     );
     const inputHandler = new InputHandler(canvas, (input: InputState) => {
       gameEngine.updateInput(input);
@@ -59,18 +61,30 @@ export function GameScreen() {
     }
   }, [state.selectedDrink]);
 
+  // Effect to handle max lives animation
+  useEffect(() => {
+    if (showMaxLivesAnimation) {
+      // Reset animation after it completes
+      const timeoutId = setTimeout(() => {
+        setShowMaxLivesAnimation(false);
+      }, 500); // Match the CSS animation duration
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [showMaxLivesAnimation]);
+
   return (
     <div className="game-screen">
       <div className="game-hud">
         <div className="lives-display">
-          {Array.from({ length: Math.max(3, state.lives) }, (_, i) => (
+          {Array.from({ length: 3 }, (_, i) => (
             <img
               key={i}
               src="/assets/pixelheart.png"
               alt="Life"
               className={`life-heart ${
                 i < state.lives ? "active" : "inactive"
-              }`}
+              } ${showMaxLivesAnimation ? "max-lives-animation" : ""}`}
               style={{
                 width: "32px",
                 height: "32px",
