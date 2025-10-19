@@ -61,11 +61,15 @@ export class GameLogic {
         if (obj.type === "boba") {
           this.handleBobaCollision();
         } else if (obj.type === "bomb") {
+          console.log(
+            `Bomb collision! Lives before: ${this.lives}, Boba count: ${this.bobaCount}`
+          );
           this.handleBombCollision();
-          if (this.lives <= 0) {
-            gameEnded = true;
-            break;
-          }
+          gameEnded = true; // Bomb collision immediately ends the game
+          console.log(
+            `Game ended due to bomb collision. Lives after: ${this.lives}`
+          );
+          break;
         } else if (obj.type === "heart") {
           this.handleHeartCollision();
         }
@@ -100,6 +104,25 @@ export class GameLogic {
       }
     }
 
+    // Check win condition only if game hasn't ended
+    console.log(
+      `End of update: gameEnded=${gameEnded}, bobaCount=${this.bobaCount}, target=${this.targetBobaCount}, lives=${this.lives}`
+    );
+
+    if (!gameEnded && this.bobaCount >= this.targetBobaCount) {
+      console.log(
+        `Game won! Boba count: ${this.bobaCount}, Target: ${this.targetBobaCount}, Drink: ${this.currentDrinkType}`
+      );
+      gameEnded = true;
+      this.onGameEnd("win");
+    } else if (gameEnded && this.lives <= 0) {
+      // Game ended due to bomb collision or other lose condition
+      console.log(
+        `Game lost! Lives: ${this.lives}, Boba count: ${this.bobaCount}`
+      );
+      this.onGameEnd("lose");
+    }
+
     return { needsRender: false, gameEnded };
   }
 
@@ -119,6 +142,9 @@ export class GameLogic {
 
   private handleBobaCollision() {
     this.bobaCount++;
+    console.log(
+      `Boba collected! New count: ${this.bobaCount}, Target: ${this.targetBobaCount}`
+    );
 
     if (this.bobaCount !== this.lastBobaCount) {
       this.lastBobaCount = this.bobaCount;
@@ -159,12 +185,7 @@ export class GameLogic {
       }
     }
 
-    if (this.bobaCount >= this.targetBobaCount) {
-      console.log(
-        `Game won! Boba count: ${this.bobaCount}, Target: ${this.targetBobaCount}, Drink: ${this.currentDrinkType}`
-      );
-      this.onGameEnd("win");
-    }
+    // Win condition will be checked in the main update method
   }
 
   private loseOneLife() {
@@ -179,7 +200,7 @@ export class GameLogic {
     // Bombs now cause instant death regardless of remaining lives
     this.lives = 0;
     this.onLivesChange(this.lives);
-    this.onGameEnd("lose");
+    // Game end will be handled by the main update method
   }
 
   private handleHeartCollision() {

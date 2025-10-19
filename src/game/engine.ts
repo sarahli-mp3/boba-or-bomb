@@ -188,11 +188,15 @@ export class GameEngine {
   }
 
   private endGame() {
-    const result = this.gameLogic.getBobaCount() >= 10 ? "win" : "lose";
+    const bobaCount = this.gameLogic.getBobaCount();
+    const targetBobaCount = this.gameLogic.getTargetBobaCount();
+    const result = bobaCount >= targetBobaCount ? "win" : "lose";
+    console.log(
+      `EndGame: bobaCount=${bobaCount}, target=${targetBobaCount}, result=${result}`
+    );
 
     // Record game statistics
     const gameTime = this.gameLogic.getGameTime();
-    const bobaCount = this.gameLogic.getBobaCount();
     GameSettingsManager.recordGameResult(bobaCount, gameTime);
 
     if (result === "win") {
