@@ -166,13 +166,8 @@ export class GameEngine {
     this.renderEngine.drawCupWithImage(this.cup, this.selectedDrink);
     this.renderEngine.drawCupFill(this.cup, this.gameLogic.getBobaCount());
 
-    // Draw HUD
+    // FPS display (if enabled)
     const settings = GameSettingsManager.getSettings();
-    this.renderEngine.drawHUD(
-      this.gameLogic.getBobaCount(),
-      settings.highScore
-    );
-
     if (settings.showFPS) {
       this.renderEngine.drawFPS(this.fps);
     }

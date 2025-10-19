@@ -273,11 +273,4 @@ export class RenderEngine {
     this.ctx.font = "16px monospace";
     this.ctx.fillText(`FPS: ${fps.toFixed(1)}`, 10, 30);
   }
-
-  drawHUD(bobaCount: number, highScore: number) {
-    this.ctx.fillStyle = "#000000";
-    this.ctx.font = "20px Arial";
-    this.ctx.fillText(`Boba: ${bobaCount}/10`, 10, 60);
-    this.ctx.fillText(`High Score: ${highScore}`, 10, 90);
-  }
 }
